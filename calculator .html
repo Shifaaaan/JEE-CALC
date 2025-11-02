@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calculator</title>
+  <style>
+    /* Reset & Base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* Calculator Container */
+    .calculator {
+      width: 318px;
+      background: #d4d4d4;
+      border: 1px solid #a0a0a0;
+      border-top-color: #e0e0e0;
+      border-left-color: #e0e0e0;
+      border-radius: 8px 8px 0 0;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+
+    /* Title Bar */
+    .title-bar {
+      background: linear-gradient(to bottom, #ff5c5c, #e03e3e);
+      color: white;
+      font-weight: bold;
+      font-size: 13px;
+      padding: 4px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .title-bar .icon {
+      width: 16px;
+      height: 16px;
+      background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABOSURBVDhPY2AYBaNgFIyCUTAKRsEoGAWjYBSMglEwCkbBKBgFo2AUjIJRMApGwSgYBaNgFIyCUTAKRsEoGAWjYBSMglEwCkbBKBgFo2AUjIJRMApGwf4B0C8Wv3n7e5EAAAAASUVORK5CYII=') no-repeat center;
+      margin-right: 6px;
+    }
+
+    .title-bar .buttons {
+      display: flex;
+      gap: 4px;
+    }
+
+    .title-bar .btn-min, .title-bar .btn-max, .title-bar .btn-close {
+      width: 14px;
+      height: 14px;
+      border: 1px solid #c03939;
+      background: #ff5c5c;
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .title-bar .btn-close::after {
+      content: "×";
+      font-size: 12px;
+      color: white;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: bold;
+    }
+
+    .title-bar .btn-min::after {
+      content: "−";
+      font-size: 14px;
+      color: white;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .title-bar .btn-max::after {
+      content: "□";
+      font-size: 12px;
+      color: white;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Menu Bar */
+    .menu-bar {
+      background: #e6e6e6;
+      border-bottom: 1px solid #c0c0c0;
+      padding: 2px 4px;
+      font-size: 12px;
+      color: #000;
+    }
+
+    .menu-bar ul {
+      list-style: none;
+      display: flex;
+      gap: 16px;
+    }
+
+    .menu-bar li {
+      cursor: pointer;
+      padding: 2px 4px;
+    }
+
+    .menu-bar li:hover {
+      background: #d0d0d0;
+    }
+
+    /* Display */
+    .display {
+      background: #f8f8f8;
+      border: 2px inset #c0c0c0;
+      margin: 12px 12px 8px;
+      height: 56px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .display input {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: transparent;
+      text-align: right;
+      font-size: 28px;
+      padding: 0 12px;
+      color: #000;
+      outline: none;
+    }
+
+    .display .memory-indicator {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #666;
+      display: none;
+    }
+
+    .display .memory-indicator.show {
+      display: block;
+    }
+
+    /* Button Grid */
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      padding: 0 12px 12px;
+    }
+
+    button {
+      height: 40px;
+      border: 1px solid #a0a0a0;
+      background: linear-gradient(to bottom, #f8f8f8, #e0e0e0);
+      font-size: 16px;
+      font-weight: bold;
+      color: #000;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.05s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    button:hover {
+      background: linear-gradient(to bottom, #ffffff, #e8e8e8);
+    }
+
+    button:active {
+      background: linear-gradient(to bottom, #d0d0d0, #e0e0e0);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+      transform: translateY(1px);
+    }
+
+    /* Special Buttons */
+    button.operator {
+      background: linear-gradient(to bottom, #f0f0f0, #d8d8d8);
+      color: #000;
+    }
+
+    button.equals {
+      background: linear-gradient(to bottom, #4da6ff, #3399ff);
+      color: white;
+      font-weight: bold;
+    }
+
+    button.equals:hover {
+      background: linear-gradient(to bottom, #66b3ff, #4da6ff);
+    }
+
+    button.equals:active {
+      background: linear-gradient(to bottom, #3399ff, #4da6ff);
+    }
+
+    /* Memory Buttons */
+    button.memory {
+      font-size: 12px;
+      color: #333;
+    }
+
+    /* Backspace */
+    button.backspace {
+      font-size: 14px;
+    }
+
+    /* Zero Button - spans 2 columns */
+    button.zero {
+      grid-column: span 2;
+    }
+
+    /* Equals Button - full height */
+    button.equals {
+      grid-row: span 2;
+      height: 86px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="calculator">
+  <!-- Title Bar -->
+  <div class="title-bar">
+    <div style="display: flex; align-items: center;">
+      <div class="icon"></div>
+      <span>Calculator</span>
+    </div>
+    <div class="buttons">
+      <div class="btn-min"></div>
+      <div class="btn-max"></div>
+      <div class="btn-close"></div>
+    </div>
+  </div>
+
+  <!-- Menu Bar -->
+  <div class="menu-bar">
+    <ul>
+      <li>View</li>
+      <li>Edit</li>
+      <li>Help</li>
+    </ul>
+  </div>
+
+  <!-- Display -->
+  <div class="display">
+    <input type="text" id="result" value="0" readonly />
+    <div class="memory-indicator" id="memory-indicator">M</div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="buttons">
+    <button class="memory">MC</button>
+    <button class="memory">MR</button>
+    <button class="memory">MS</button>
+    <button class="memory">M+</button>
+    <button class="memory">M−</button>
+
+    <button class="backspace">←</button>
+    <button class="operator">CE</button>
+    <button class="operator">C</button>
+    <button class="operator">±</button>
+    <button class="operator">√</button>
+
+    <button>7</button>
+    <button>8</button>
+    <button>9</button>
+    <button class="operator">/</button>
+    <button class="operator">%</button>
+
+    <button>4</button>
+    <button>5</button>
+    <button>6</button>
+    <button class="operator">*</button>
+    <button class="operator">1/x</button>
+
+    <button>1</button>
+    <button>2</button>
+    <button>3</button>
+    <button class="operator">-</button>
+    <button class="equals equals">=</button>
+
+    <button class="zero">0</button>
+    <button class="operator">.</button>
+    <button class="operator">+</button>
+  </div>
+</div>
+
+<script>
+  const display = document.getElementById('result');
+  const memoryIndicator = document.getElementById('memory-indicator');
+  let currentInput = '0';
+  let operator = null;
+  let previousInput = null;
+  let memory = 0;
+
+  function updateDisplay() {
+    display.value = currentInput;
+    memoryIndicator.classList.toggle('show', memory !== 0);
+  }
+
+  function clear() {
+    currentInput = '0';
+    operator = null;
+    previousInput = null;
+    updateDisplay();
+  }
+
+  function inputDigit(digit) {
+    if (currentInput === '0' && digit !== '.') {
+      currentInput = digit;
+    } else {
+      currentInput += digit;
+    }
+    updateDisplay();
+  }
+
+  function inputDecimal() {
+    if (!currentInput.includes('.')) {
+      currentInput += '.';
+    }
+    updateDisplay();
+  }
+
+  function backspace() {
+    if (currentInput.length > 1) {
+      currentInput = currentInput.slice(0, -1);
+    } else {
+      currentInput = '0';
+    }
+    updateDisplay();
+  }
+
+  function setOperator(op) {
+    if (operator !== null) calculate();
+    previousInput = currentInput;
+    currentInput = '0';
+    operator = op;
+  }
+
+  function calculate() {
+    if (operator === null || previousInput === null) return;
+    const prev = parseFloat(previousInput);
+    const curr = parseFloat(currentInput);
+    let result;
+
+    switch (operator) {
+      case '+': result = prev + curr; break;
+      case '-': result = prev - curr; break;
+      case '*': result = prev * curr; break;
+      case '/': result = prev / curr; break;
+      case '%': result = prev % curr; break;
+      default: return;
+    }
+
+    currentInput = result.toString();
+    operator = null;
+    previousInput = null;
+    updateDisplay();
+  }
+
+  function toggleSign() {
+    currentInput = (parseFloat(currentInput) * -1).toString();
+    updateDisplay();
+  }
+
+  function reciprocal() {
+    currentInput = (1 / parseFloat(currentInput)).toString();
+    updateDisplay();
+  }
+
+  function squareRoot() {
+    currentInput = Math.sqrt(parseFloat(currentInput)).toString();
+    updateDisplay();
+  }
+
+  function percent() {
+    currentInput = (parseFloat(currentInput) / 100).toString();
+    updateDisplay();
+  }
+
+  // Memory Functions
+  function memoryClear() {
+    memory = 0;
+    updateDisplay();
+  }
+
+  function memoryRecall() {
+    currentInput = memory.toString();
+    updateDisplay();
+  }
+
+  function memoryStore() {
+    memory = parseFloat(currentInput);
+    updateDisplay();
+  }
+
+  function memoryAdd() {
+    memory += parseFloat(currentInput);
+    updateDisplay();
+  }
+
+  function memorySubtract() {
+    memory -= parseFloat(currentInput);
+    updateDisplay();
+  }
+
+  // Event Listeners
+  document.querySelectorAll('.buttons button').forEach(button => {
+    button.addEventListener('click', () => {
+      const value = button.textContent;
+
+      if ('0123456789'.includes(value)) {
+        inputDigit(value);
+      } else if (value === '.') {
+        inputDecimal();
+      } else if (value === '←') {
+        backspace();
+      } else if (value === 'CE') {
+        currentInput = '0';
+        updateDisplay();
+      } else if (value === 'C') {
+        clear();
+      } else if (value === '±') {
+        toggleSign();
+      } else if (value === '√') {
+        squareRoot();
+      } else if (value === '1/x') {
+        reciprocal();
+      } else if (value === '%') {
+        percent();
+      } else if (value === 'MC') {
+        memoryClear();
+      } else if (value === 'MR') {
+        memoryRecall();
+      } else if (value === 'MS') {
+        memoryStore();
+      } else if (value === 'M+') {
+        memoryAdd();
+      } else if (value === 'M−') {
+        memorySubtract();
+      } else if (value === '=') {
+        calculate();
+      } else {
+        setOperator(value);
+      }
+    });
+  });
+
+  // Initialize
+  updateDisplay();
+</script>
+
+</body>
+</html>
